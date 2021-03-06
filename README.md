@@ -5,7 +5,7 @@ Funkčné ontológie: Capec, Cybox, CyboxCommon, DataMarking, killchain, Maec, S
 Nefunkčné ontológie nejdú importovať do databázy pravdepodobne z dôvodu, že niesú v RDF XML formáte.
 Preto ich importovanie je zakomentované.
 
-ERROR pri importovaní v danej ontológií:
+ERROR pri importovaní nefunkčných ontológií:
 org.openrdf.rio.RDFParseException: unqualified attribute 'ontologyIRI' not allowed
 
 ## Blazegraph ##
@@ -24,9 +24,9 @@ Java 11, Maven, Blazegraph.
 
 V zložke src/main/resource/aplication.yaml
 
-Poprosím nastavte si tam cestu k novému journal súboru.
+Vytvorte si nový journal súbor nazov.jnl a nastavte si tam cestu pre tento journal súbor.
 
-Tento nový journal súbor nemôže byť použitý žiadnou ďalšou aplikáciou.
+Tento nový journal súbor nemôže by nemal byť použitý žiadnou ďalšou aplikáciou.
 
 ### Ako spustiť aplikáciu? ###
 
@@ -55,4 +55,8 @@ Aktuálna verzia 2
 
 V communication-controller sú dve API:
 1. Create - na vytvorenie ontologií, true/false parametre pre danú ontológiu.
-2. Query - na dotazovanie k databáze. 
+2. Query - na dotazovanie k databáze.
+
+### Vývoj ###
+
+Pre Vaše ďalšie vytvorené funkcionality v tomto projekte si vytvorte novú branchu mimo branche master a develop.
