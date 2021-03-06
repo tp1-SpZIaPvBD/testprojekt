@@ -120,10 +120,10 @@ public class BlazegraphServiceImpl implements BlazegraphService {
 //                ClassPathResource res = new ClassPathResource(uco2ResourcePath + "STUCCO.owl");
 //                repositoryConnection.add(new File(res.getPath()), "base:", RDFFormat.RDFXML);
 //            }
-            if(uco2) {
-                ClassPathResource res = new ClassPathResource(uco2ResourcePath + "uco_2.owl");
-                repositoryConnection.add(new File(res.getPath()), "base:", RDFFormat.RDFXML);
-            }
+//            if(uco2) {
+//                ClassPathResource res = new ClassPathResource(uco2ResourcePath + "uco_2.owl");
+//                repositoryConnection.add(new File(res.getPath()), "base:", RDFFormat.RDFXML);
+//            }
 
             repositoryConnection.commit();
         } catch (OpenRDFException ex) {
