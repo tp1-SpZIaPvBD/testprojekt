@@ -26,7 +26,7 @@ V zložke src/main/resource/aplication.yaml
 
 Vytvorte si nový journal súbor nazov.jnl a nastavte si tam cestu pre tento journal súbor.
 
-Tento nový journal súbor nemôže by nemal byť použitý žiadnou ďalšou aplikáciou.
+Tento nový journal súbor by nemal byť použitý žiadnou ďalšou aplikáciou.
 
 ### Ako spustiť aplikáciu? ###
 
