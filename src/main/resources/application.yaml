@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+uco2:
+  resource:
+    path: src\main\resources\uco2\
+
+journal:
+  file:
+    location: C:\\Users\\nanko\\OneDrive\\Počítač\\blazegraph\\example.jnl
