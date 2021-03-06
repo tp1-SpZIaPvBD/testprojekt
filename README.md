@@ -30,9 +30,9 @@ Tento nový journal súbor by nemal byť použitý žiadnou ďalšou aplikáciou
 
 ### Ako spustiť aplikáciu? ###
 
-1. Ako maven projekt v IDE programe pre Javu. 
+A) Ako maven projekt v IDE programe pre Javu. 
 
-2. Inštalácia a spustenie - príkazom v zložke projektu *testprojekt*
+B) Inštalácia a spustenie - príkazom v zložke projektu *testprojekt*
 > Poznámka: verzie a snapshot projektu sa budú v budúcnosti meniť!
 ```sh
 $ mvn clean install
@@ -42,7 +42,7 @@ $ java -jar testprojekt-0.0.1-SNAPSHOT.jar
 
 ### Swagger ###
 
-Užitočné na prevolavanie aplikácie pomocou REST API, alternatíva pre Postmana.
+Užitočný na prevolavanie aplikácie pomocou REST API, alternatíva pre Postmana.
 
 Po štarte aplikácie zavolaj URL uvedenú nižšie.
 
