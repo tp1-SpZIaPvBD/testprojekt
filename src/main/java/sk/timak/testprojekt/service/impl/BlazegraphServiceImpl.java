@@ -2,10 +2,10 @@ package sk.timak.testprojekt.service.impl;
 
 import org.openrdf.OpenRDFException;
 import org.openrdf.query.*;
+import org.openrdf.query.resultio.sparqljson.SPARQLResultsJSONWriter;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,25 +17,24 @@ import sk.timak.testprojekt.controller.advice.exception.WrongFormatException;
 import sk.timak.testprojekt.controller.advice.exception.WrongQueryException;
 import sk.timak.testprojekt.service.BlazegraphService;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
 
 @Service
 public class BlazegraphServiceImpl implements BlazegraphService {
 
     private static final Logger logger = LoggerFactory.getLogger(BlazegraphServiceImpl.class);
 
-    @Value("${uco2.resource.path}")
+    @Value("${resource.path.uco2}")
     private String uco2ResourcePath;
+
+    @Value("${resource.path.cve}")
+    private String cveResourcePath;
 
     @Autowired
     private RepositoryComponent repositoryComponent;
 
     @Override
-    public List<String> getResult(String query) throws RepositoryException {
-        List<String> answer = null;
+    public String getResult(String query) throws RepositoryException {
         RepositoryConnection repositoryConnection = null;
         try {
             repositoryConnection = repositoryComponent.getRepository().getConnection();
@@ -43,31 +42,52 @@ public class BlazegraphServiceImpl implements BlazegraphService {
             final TupleQuery tupleQuery = repositoryConnection
                     .prepareTupleQuery(QueryLanguage.SPARQL,
                             query);
-            TupleQueryResult result = tupleQuery.evaluate();
-            try {
-                answer = new ArrayList<>();
-                while (result.hasNext()) {
-                    BindingSet bindingSet = result.next();
-                    answer.add(bindingSet.toString().substring(1,bindingSet.toString().length()-1));
-                }
-            } finally {
-                result.close();
-            }
-        } catch (RepositoryException | MalformedQueryException | QueryEvaluationException e) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            tupleQuery.evaluate(new SPARQLResultsJSONWriter(stream));
+
+            return new String(stream.toByteArray());
+        } catch (RepositoryException | MalformedQueryException |
+                QueryEvaluationException | TupleQueryResultHandlerException e) {
             logger.error(e.toString());
             throw new WrongQueryException(e.toString());
         } finally {
             if(repositoryConnection != null)
                 repositoryConnection.close();
         }
-        return answer;
     }
 
     @Override
-    public void addOWLInDatabase(Boolean capec, Boolean cce, Boolean cve, Boolean cvss,
+    public boolean createCVE() throws RepositoryException {
+        RepositoryConnection repositoryConnection = repositoryComponent.getRepository().getConnection();
+
+        try {
+            repositoryConnection.begin();
+
+            ClassPathResource res = new ClassPathResource(cveResourcePath + "CVE.rdf");
+            repositoryConnection.add(new File(res.getPath()), "base:", RDFFormat.RDFXML);
+
+            for(int i = 1999; i < 2022; i++){
+                String year = String.valueOf(i);
+                res = new ClassPathResource(cveResourcePath + "data\\" + year + ".rdf");
+                repositoryConnection.add(new File(res.getPath()), "base:", RDFFormat.TURTLE);
+            }
+
+            repositoryConnection.commit();
+            return true;
+        } catch (OpenRDFException | IOException ex) {
+            repositoryConnection.rollback();
+            logger.error(ex.toString());
+            throw new WrongFormatException(ex.toString());
+        } finally {
+            repositoryConnection.close();
+        }
+    }
+
+    @Override
+    public boolean addUco2InDatabase(Boolean capec, Boolean cce, Boolean cve, Boolean cvss,
                                    Boolean cybox, Boolean cyboxCommon, Boolean dataMarking,
                                    Boolean IDSO, Boolean killchain, Boolean maec,
-                                   Boolean stix, Boolean stucco, Boolean uco2) throws RepositoryException, RDFParseException {
+                                   Boolean stix, Boolean stucco, Boolean uco2, Boolean OVAL) throws RepositoryException {
         RepositoryConnection repositoryConnection = repositoryComponent.getRepository().getConnection();
 
         try {
@@ -124,8 +144,13 @@ public class BlazegraphServiceImpl implements BlazegraphService {
 //                ClassPathResource res = new ClassPathResource(uco2ResourcePath + "uco_2.owl");
 //                repositoryConnection.add(new File(res.getPath()), "base:", RDFFormat.RDFXML);
 //            }
+//            if(OVAL) {
+//                ClassPathResource res = new ClassPathResource(uco2ResourcePath + "OVAL.owl");
+//                repositoryConnection.add(new File(res.getPath()), "base:", RDFFormat.RDFXML);
+//            }
 
             repositoryConnection.commit();
+            return true;
         } catch (OpenRDFException ex) {
             repositoryConnection.rollback();
             logger.error(ex.toString());
@@ -135,5 +160,6 @@ public class BlazegraphServiceImpl implements BlazegraphService {
         } finally {
             repositoryConnection.close();
         }
+        return false;
     }
 }

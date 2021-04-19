@@ -25,22 +25,35 @@ public class CommunicationController {
         return ResponseEntity.ok(blazegraphService.getResult(query));
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createOWLInDatabase(@RequestParam(required = true) Boolean capec,
-                                                 @RequestParam(required = false) Boolean cce,
-                                                 @RequestParam(required = false) Boolean cve,
-                                                 @RequestParam(required = false) Boolean cvss,
-                                                 @RequestParam(required = true) Boolean cybox,
-                                                 @RequestParam(required = true) Boolean cyboxCommon,
-                                                 @RequestParam(required = true) Boolean dataMarking,
-                                                 @RequestParam(required = false) Boolean IDSO,
-                                                 @RequestParam(required = true) Boolean killchain,
-                                                 @RequestParam(required = true) Boolean maec,
-                                                 @RequestParam(required = true) Boolean stix,
-                                                 @RequestParam(required = false) Boolean stucco,
-                                                 @RequestParam(required = false) Boolean uco2) throws RDFParseException, RepositoryException {
-        blazegraphService.addOWLInDatabase(capec, cce, cve, cvss, cybox, cyboxCommon,
-                dataMarking, IDSO, killchain, maec, stix, stucco, uco2);
-        return ResponseEntity.ok("SUCCESS.");
+    @PostMapping("/create/actual/cve")
+    public ResponseEntity<?> createCVEAndImportCVE() throws RDFParseException, RepositoryException {
+        boolean result = blazegraphService.createCVE();
+        if(result)
+            return ResponseEntity.ok("SUCCESS");
+        else
+            return ResponseEntity.ok("FAILURE");
+    }
+
+    @PostMapping("/create/uco2/")
+    public ResponseEntity<?> createUco2InDatabase(@RequestParam(required = false, defaultValue = "true") Boolean capec,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean cce,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean cve,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean cvss,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean cybox,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean cyboxCommon,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean dataMarking,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean IDSO,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean killchain,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean maec,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean stix,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean stucco,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean uco2,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean OVAL) throws RDFParseException, RepositoryException {
+        boolean result = blazegraphService.addUco2InDatabase(capec, cce, cve, cvss, cybox, cyboxCommon,
+                dataMarking, IDSO, killchain, maec, stix, stucco, uco2, OVAL);
+        if(result)
+            return ResponseEntity.ok("SUCCESS");
+        else
+            return ResponseEntity.ok("FAILURE");
     }
 }

@@ -1,9 +1,10 @@
 server:
   port: 8080
 
-uco2:
-  resource:
-    path: src\main\resources\uco2\
+resource:
+  path: src\main\resources\ontologies\
+    uco2: src\main\resources\ontologies\uco2\
+    cve: src\main\resources\ontologies\actual_cve\
 
 journal:
   file:

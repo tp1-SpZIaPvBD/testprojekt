@@ -33,7 +33,6 @@ public class ApplicationConfiguration extends WebSecurityConfigurerAdapter {
         return new Jackson2ObjectMapperBuilder()
                 .indentOutput(true)
                 .propertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE)
-//                .serializationInclusion(JsonInclude.Include.NON_NULL) //TODO: uncomment if we need exclude null attributes in response JSON object
                 .build();
     }
 
