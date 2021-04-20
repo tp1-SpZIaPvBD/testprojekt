@@ -38,8 +38,8 @@ public class BlazegraphServiceImpl implements BlazegraphService {
 
     @Override
     public String getResult(String query) throws RepositoryException {
-        query = UriUtils.decode(query, "UTF-8");
-        logger.info(query);
+        query = query.replaceAll("%20"," ");
+
         RepositoryConnection repositoryConnection = null;
         try {
             repositoryConnection = repositoryComponent.getRepository().getConnection();
@@ -53,7 +53,7 @@ public class BlazegraphServiceImpl implements BlazegraphService {
             return new String(stream.toByteArray());
         } catch (RepositoryException | MalformedQueryException |
                 QueryEvaluationException | TupleQueryResultHandlerException e) {
-            logger.error(e.toString());
+            logger.error(query + "\n" + e.toString());
             throw new WrongQueryException(e.toString());
         } finally {
             if(repositoryConnection != null)
