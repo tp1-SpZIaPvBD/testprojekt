@@ -1,8 +1,12 @@
 server:
   port: 8080
 
+cross:
+  origin:
+    resource: http://147.175.121.153
+
 resource:
-  path: src\main\resources\ontologies\
+  path:
     uco2: src\main\resources\ontologies\uco2\
     cve: src\main\resources\ontologies\actual_cve\
 
