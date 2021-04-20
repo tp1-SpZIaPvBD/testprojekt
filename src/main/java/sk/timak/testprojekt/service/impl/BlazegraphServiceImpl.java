@@ -68,7 +68,7 @@ public class BlazegraphServiceImpl implements BlazegraphService {
 
             for(int i = 1999; i < 2022; i++){
                 String year = String.valueOf(i);
-                res = new ClassPathResource(cveResourcePath + "data\\" + year + ".rdf");
+                res = new ClassPathResource(cveResourcePath + "data\\cve_generate_data_" + year + ".rdf");
                 repositoryConnection.add(new File(res.getPath()), "base:", RDFFormat.TURTLE);
             }
 
