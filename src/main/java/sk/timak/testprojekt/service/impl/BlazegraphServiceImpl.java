@@ -18,6 +18,8 @@ import sk.timak.testprojekt.controller.advice.exception.WrongQueryException;
 import sk.timak.testprojekt.service.BlazegraphService;
 
 import java.io.*;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class BlazegraphServiceImpl implements BlazegraphService {
@@ -35,6 +37,8 @@ public class BlazegraphServiceImpl implements BlazegraphService {
 
     @Override
     public String getResult(String query) throws RepositoryException {
+        query = URLDecoder.decode(query, StandardCharsets.UTF_8);
+        System.out.println(query);
         RepositoryConnection repositoryConnection = null;
         try {
             repositoryConnection = repositoryComponent.getRepository().getConnection();
