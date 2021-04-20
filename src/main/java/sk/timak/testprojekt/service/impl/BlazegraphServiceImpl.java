@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriUtils;
 import sk.timak.testprojekt.component.RepositoryComponent;
 import sk.timak.testprojekt.controller.advice.exception.WrongFormatException;
 import sk.timak.testprojekt.controller.advice.exception.WrongQueryException;
@@ -37,8 +38,8 @@ public class BlazegraphServiceImpl implements BlazegraphService {
 
     @Override
     public String getResult(String query) throws RepositoryException {
-        query = URLDecoder.decode(query, StandardCharsets.UTF_8);
-        System.out.println(query);
+        query = UriUtils.decode(query, "UTF-8");
+        logger.info(query);
         RepositoryConnection repositoryConnection = null;
         try {
             repositoryConnection = repositoryComponent.getRepository().getConnection();
