@@ -1,18 +1,19 @@
 server:
   port: 8080
   tomcat:
-    relaxed-path-chars: {,},<,>
-    relaxed-query-chars: {,},<,>
-
+    relaxed-path-chars: ['{','}','<','>']
+    relaxed-query-chars: ['{','}','<','>']
+#leave this property
 cross:
   origin:
     resource: http://147.175.121.153
-
+#leave this property
+base:
+  url: localhost:8080
+#property ontology is path to ontologies repository
+#property journal is path to journal file where is whole ontology
 resource:
+  oval: oval_generate_data_asa.rdf,oval_generate_data_ios.rdf,oval_generate_data_iosxe.rdf,oval_generate_data_macos.rdf,oval_generate_data_pixos.rdf,oval_generate_data_unix.rdf,oval_generate_data_windows.rdf
   path:
-    uco2: src\main\resources\ontologies\uco2\
-    cve: src\main\resources\ontologies\actual_cve\
-
-journal:
-  file:
-    location: C:\\your\\example\\path\\blazegraph\\example.jnl
+    ontology: D:\\testzmazat\\ontologies
+    journal: C:\\your\\example\\path\\blazegraph\\example.jnl

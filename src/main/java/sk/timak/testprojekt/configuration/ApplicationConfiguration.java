@@ -54,7 +54,6 @@ public class ApplicationConfiguration extends WebSecurityConfigurerAdapter {
     public ObjectMapper customJson() {
         return new Jackson2ObjectMapperBuilder()
                 .indentOutput(true)
-                .propertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE)
                 .build();
     }
 

@@ -26,5 +26,4 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, ex.toString(),
                 new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
-
 }

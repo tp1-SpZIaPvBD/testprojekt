@@ -16,7 +16,7 @@ import java.util.Properties;
 @Component
 public class RepositoryComponent {
 
-    @Value("${journal.file.location}")
+    @Value("${resource.path.journal}")
     private String journalFileLocation;
 
     private Repository repository;

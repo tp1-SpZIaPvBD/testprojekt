@@ -25,14 +25,26 @@ public class CommunicationController {
         return ResponseEntity.ok(blazegraphService.getResult(query));
     }
 
-//    @PostMapping("/create/actual/cve")
-//    public ResponseEntity<?> createCVEAndImportCVE() throws RDFParseException, RepositoryException {
-//        boolean result = blazegraphService.createCVE();
-//        if(result)
-//            return ResponseEntity.ok("SUCCESS");
-//        else
-//            return ResponseEntity.ok("FAILURE");
-//    }
+    @GetMapping("/search")
+    public ResponseEntity<?> getSearchResults(@RequestParam String platform) throws RepositoryException {
+        return ResponseEntity.ok(blazegraphService.getSearchResult(platform));
+    }
+
+    @GetMapping("/entity")// do not use it
+    public ResponseEntity<?> getEntityResults(@RequestParam(required = true) String id,
+                                              @RequestParam(required = false) String props,
+                                              @RequestParam(required = false) String languages,
+                                              @RequestParam(required = false) Boolean languagefallback) throws RepositoryException {
+        return ResponseEntity.ok(blazegraphService.getEntityResult(id, props));
+    }
+
+    @PostMapping("/create/ontology")
+    public ResponseEntity<?> createCVEAndImportCVE() throws RDFParseException, RepositoryException {
+        if(blazegraphService.createCVE())
+            return ResponseEntity.ok("SUCCESS");
+        else
+            return ResponseEntity.ok("FAILURE");
+    }
 
 //    @PostMapping("/create/uco2/")
 //    public ResponseEntity<?> createUco2InDatabase(@RequestParam(required = false, defaultValue = "true") Boolean capec,
