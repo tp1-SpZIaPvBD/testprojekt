@@ -19,9 +19,14 @@ import sk.timak.testprojekt.domain.searchendpoint.FulltextSearchNotFound;
 import sk.timak.testprojekt.domain.searchendpoint.FulltextSearchResponse;
 import sk.timak.testprojekt.domain.searchendpoint.Match;
 import sk.timak.testprojekt.domain.searchendpoint.Search;
+import sk.timak.testprojekt.domain.searchentity.fatentity.*;
+import sk.timak.testprojekt.domain.searchentity.fatentity.claims.Claims;
+import sk.timak.testprojekt.domain.searchentity.fatentity.claims.DataValue;
+import sk.timak.testprojekt.domain.searchentity.fatentity.claims.Mainsnak;
 import sk.timak.testprojekt.domain.searchentity.missing.MissingEntity;
+import sk.timak.testprojekt.domain.searchentity.multipleentities.Item;
+import sk.timak.testprojekt.domain.searchentity.multipleentities.MultipleEntities;
 import sk.timak.testprojekt.domain.searchentity.simple.Entity;
-import sk.timak.testprojekt.domain.searchentity.simple.EntityObject;
 import sk.timak.testprojekt.domain.searchentity.simple.SimpleEntity;
 import sk.timak.testprojekt.service.BlazegraphService;
 
@@ -151,18 +156,106 @@ public class BlazegraphServiceImpl implements BlazegraphService {
 
     @Override
     public Object getEntityResult(String id, String props) throws RepositoryException {
-        String[] ids = id.split("\\|");
+        String[] ids = id.split("%");//delimiter for ids
 
         if(ids.length > 1){//multiple entity
-
+            MultipleEntities multipleEntities = new MultipleEntities();
+            for (String s : ids) {
+                Item item = (Item) getMultipleEntities(s);
+                multipleEntities.setEntities(item.getId(), item);
+            }
+            return multipleEntities;
         } else {
-            if(props.equalsIgnoreCase("info")){//simple entity
+            if(props != null && props.equalsIgnoreCase("info")){//simple entity
                 return getSimpleEntity(ids[0]);
             } else {//fat entity
-
+                return getFatEntity(ids[0]);
             }
         }
-        return null;
+    }
+
+    private Object getMultipleEntities(String id) throws RepositoryException{
+        RepositoryConnection repositoryConnection = null;
+        try {
+            repositoryConnection = repositoryComponent.getRepository().getConnection();
+
+            final TupleQuery tupleQuery = repositoryConnection
+                    .prepareTupleQuery(QueryLanguage.SPARQL,
+                            queryEntitySearch(id));
+
+            final TupleQueryResult result = tupleQuery.evaluate();
+
+            Item item = new Item();
+            try {
+                while (result.hasNext()) {
+                    final BindingSet bindingSet = result.next();
+                    if(bindingSet.getValue("property").stringValue().contains("hasRefID")){
+                        item.setId(bindingSet.getValue("value").stringValue());
+                    }
+                    if(bindingSet.getValue("property").stringValue().contains("hasDescription")){
+                        item.setLabels(new Labels(new En(bindingSet.getValue("value").stringValue())));
+                    }
+                }
+            } finally {
+                result.close();
+            }
+
+            return null;
+        } catch (RepositoryException | MalformedQueryException |
+                QueryEvaluationException e) {
+            logger.error(id + "\n" + e.toString());
+            throw new WrongQueryException(e.toString());
+        } finally {
+            if(repositoryConnection != null)
+                repositoryConnection.close();
+        }
+    }
+
+    private Object getFatEntity(String id) throws RepositoryException {
+        RepositoryConnection repositoryConnection = null;
+        try {
+            repositoryConnection = repositoryComponent.getRepository().getConnection();
+
+            final TupleQuery tupleQuery = repositoryConnection
+                    .prepareTupleQuery(QueryLanguage.SPARQL,
+                            queryEntitySearch(id));
+            final TupleQueryResult result = tupleQuery.evaluate();
+
+            FatEntity fatEntity = new FatEntity();
+
+            FatEntityStructure fatEntityStructure = new FatEntityStructure();
+            fatEntityStructure.setId(id);
+
+            //int reference = 1;
+            try {
+                while (result.hasNext()) {
+                    final BindingSet bindingSet = result.next();
+
+                    if(bindingSet.getValue("property").stringValue().contains("hasRefID")){
+                        fatEntityStructure.setLabels(new Labels(new En(bindingSet.getValue("value").stringValue())));
+                    }
+                    if(bindingSet.getValue("property").stringValue().contains("hasDescription")){
+                        fatEntityStructure.setDescriptions(new Descriptions(new En(bindingSet.getValue("value").stringValue())));
+                    }
+                    if(bindingSet.getValue("property").stringValue().contains("hasReference")){
+                        fatEntityStructure.setClaims(bindingSet.getValue("property").stringValue()/*.concat(String.valueOf(reference++))*/,
+                                new Claims(new Mainsnak(bindingSet.getValue("property").stringValue(),
+                                        new DataValue(bindingSet.getValue("value").stringValue(),"string"))));
+                    }
+                }
+            } finally {
+                result.close();
+            }
+            fatEntity.setEntities(id, fatEntityStructure);
+            return fatEntity;
+        } catch (RepositoryException | MalformedQueryException |
+                QueryEvaluationException e) {
+            logger.error(id + "\n" + e.toString());
+            throw new WrongQueryException(e.toString());
+        } finally {
+            if(repositoryConnection != null)
+                repositoryConnection.close();
+        }
     }
 
     private Object getSimpleEntity(String id) throws RepositoryException {
@@ -175,19 +268,19 @@ public class BlazegraphServiceImpl implements BlazegraphService {
                             queryEntitySearch(id));
             final TupleQueryResult result = tupleQuery.evaluate();
 
-            EntityObject entityObject = new EntityObject();
-            entityObject.setType("item");
+            Entity entity = new Entity();
+            entity.setType("item");
             try {
                 while (result.hasNext()) {
                     final BindingSet bindingSet = result.next();
                     if(bindingSet.getValue("property").stringValue().contains("hasRefID")){
-                        entityObject.setId( // dummy logic
+                        entity.setId( // dummy logic
                                 id.contains(bindingSet.getValue("value").stringValue()) ?
                                         id : bindingSet.getValue("value").stringValue()
                         );
                     }
                     if(bindingSet.getValue("property").stringValue().contains("hasTitle")){
-                        entityObject.setTitle( // dummy logic
+                        entity.setTitle( // dummy logic
                                 id.contains(bindingSet.getValue("value").stringValue()) ?
                                         id : bindingSet.getValue("value").stringValue()
                         );
@@ -196,11 +289,8 @@ public class BlazegraphServiceImpl implements BlazegraphService {
             } finally {
                 result.close();
             }
-            Entity entity = new Entity();
-            entity.setDetail(id, entityObject);
-
             SimpleEntity simpleEntity = new SimpleEntity();
-            simpleEntity.setEntities(entity);
+            simpleEntity.setEntities(id, entity);
 
             return simpleEntity;
         } catch (RepositoryException | MalformedQueryException |
@@ -210,13 +300,11 @@ public class BlazegraphServiceImpl implements BlazegraphService {
             if(repositoryConnection != null)
                 repositoryConnection.close();
         }
-        //here return missing entity
+        //here return missing(?maybe error?) entity
         MissingEntity missingEntity = new MissingEntity();
         missingEntity.setId(id);
-        Entity entity = new Entity();
-        entity.setDetail(id,missingEntity);
         SimpleEntity simpleEntity = new SimpleEntity();
-        simpleEntity.setEntities(entity);
+        simpleEntity.setEntities(id,missingEntity);
         return simpleEntity;
     }
 
