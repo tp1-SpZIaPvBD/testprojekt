@@ -1,13 +1,5 @@
 # Servis na komunikáciu s databázou Blazegraph #
 
-Funkčné ontológie: Capec, Cybox, CyboxCommon, DataMarking, killchain, Maec, STIX.
-
-Nefunkčné ontológie nejdú importovať do databázy pravdepodobne z dôvodu, že niesú v RDF XML formáte.
-Preto ich importovanie je zakomentované.
-
-ERROR pri importovaní nefunkčných ontológií:
-org.openrdf.rio.RDFParseException: unqualified attribute 'ontologyIRI' not allowed
-
 ## Blazegraph ##
 
 Blazegraph wiki [odkaz](https://github.com/blazegraph/database/wiki/About_Blazegraph)
@@ -53,9 +45,10 @@ _http://\<host>:\<port>/swagger-ui.html_
 Aktuálna verzia 2
 > Poznámka: viacej informácií o Swagger v docs na tomto [odkaze](https://swagger.io/docs/)
 
-V communication-controller sú dve API:
-1. Create - na vytvorenie ontologií, true/false parametre pre danú ontológiu.
-2. Query - na dotazovanie k databáze.
+V communication-controller sú API:
+1. http://localhost:8080/query?query=SELECT DISTINCT ?property ?value WHERE { <https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2007-1216> ?property ?value. }.
+2. http://localhost:8080/search?platform=Linux
+3. http://localhost:8080/entity?id=https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2001-1494&props=info
 
 ### Vývoj ###
 
