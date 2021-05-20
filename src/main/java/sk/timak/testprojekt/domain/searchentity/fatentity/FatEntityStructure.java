@@ -1,6 +1,7 @@
 package sk.timak.testprojekt.domain.searchentity.fatentity;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,7 +13,8 @@ public class FatEntityStructure {
     private Labels labels;
     private Descriptions descriptions;
     private Map<String, ArrayList<Object>> claims = new LinkedHashMap<>();
-    private Aliases aliases;
+    @JsonProperty("aliases")
+    private Aliases aliases = new Aliases();
 
     public FatEntityStructure() {
     }

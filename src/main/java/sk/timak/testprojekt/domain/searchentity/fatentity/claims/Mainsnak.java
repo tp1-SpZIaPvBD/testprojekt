@@ -1,7 +1,7 @@
 package sk.timak.testprojekt.domain.searchentity.fatentity.claims;
 
 public class Mainsnak {
-    private String snaketype = "value";
+    private String snaktype = "value";
     private String property;
     private DataValue datavalue;
     private String datatype = "quantity";
@@ -14,12 +14,12 @@ public class Mainsnak {
         this.datavalue = datavalue;
     }
 
-    public String getSnaketype() {
-        return snaketype;
+    public String getSnaktype() {
+        return snaktype;
     }
 
-    public void setSnaketype(String snaketype) {
-        this.snaketype = snaketype;
+    public void setSnaktype(String snaketype) {
+        this.snaktype = snaketype;
     }
 
     public String getProperty() {

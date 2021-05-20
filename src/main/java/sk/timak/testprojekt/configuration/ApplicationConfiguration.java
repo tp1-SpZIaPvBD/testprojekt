@@ -2,6 +2,7 @@ package sk.timak.testprojekt.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +43,7 @@ public class ApplicationConfiguration extends WebSecurityConfigurerAdapter {
         final CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.addAllowedOrigin("*");
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
         configuration.setAllowedHeaders(Arrays.asList("Cache-Control", "Content-Type"));
         configuration.setMaxAge(3600L); //half hour
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -52,9 +53,11 @@ public class ApplicationConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     public ObjectMapper customJson() {
-        return new Jackson2ObjectMapperBuilder()
+        ObjectMapper mapper = new Jackson2ObjectMapperBuilder()
                 .indentOutput(true)
                 .build();
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        return mapper;
     }
 
     @Bean
