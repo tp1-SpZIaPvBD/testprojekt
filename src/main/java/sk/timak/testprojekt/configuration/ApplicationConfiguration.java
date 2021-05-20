@@ -41,7 +41,7 @@ public class ApplicationConfiguration extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
-        configuration.addAllowedOrigin(allowedCrossOrigin);
+        configuration.addAllowedOrigin("*");
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Arrays.asList("Cache-Control", "Content-Type"));
         configuration.setMaxAge(3600L); //half hour
