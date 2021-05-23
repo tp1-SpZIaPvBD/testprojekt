@@ -31,6 +31,7 @@ import sk.timak.testprojekt.domain.searchentity.simple.SimpleEntity;
 import sk.timak.testprojekt.service.BlazegraphService;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -63,16 +64,6 @@ public class BlazegraphServiceImpl implements BlazegraphService {
                             query);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             tupleQuery.evaluate(new SPARQLResultsJSONWriter(stream));
-
-            final TupleQueryResult result = tupleQuery.evaluate();
-            try {
-                while (result.hasNext()) {
-                    final BindingSet bindingSet = result.next();
-                    System.err.println(bindingSet);
-                }
-            } finally {
-                result.close();
-            }
 
             return new String(stream.toByteArray());
         } catch (RepositoryException | MalformedQueryException |
@@ -156,7 +147,10 @@ public class BlazegraphServiceImpl implements BlazegraphService {
 
     @Override
     public Object getEntityResult(String id, String props) throws RepositoryException {
-        String[] ids = id.split("%");//delimiter for ids
+        if(id.equals("http://www.semanticweb.org/rycht/ontologies/cyber_security_ontology/platform") && props.equals("labels"))
+            return getDummyResponseForPlatform(id);
+
+        String[] ids = id.split("\\|");//delimiter for ids
 
         if(ids.length > 1){//multiple entity
             MultipleEntities multipleEntities = new MultipleEntities();
@@ -172,6 +166,16 @@ public class BlazegraphServiceImpl implements BlazegraphService {
                 return getFatEntity(ids[0]);
             }
         }
+    }
+
+    private Object getDummyResponseForPlatform(String id){
+        FatEntityStructure fatEntityStructure = new FatEntityStructure();
+        fatEntityStructure.setId(id);
+        fatEntityStructure.setLabels(new Labels(new En("platform")));
+
+        FatEntity fatEntity = new FatEntity();
+        fatEntity.setEntities(id, fatEntityStructure);
+        return fatEntity;
     }
 
     private Object getMultipleEntities(String id) throws RepositoryException{
@@ -200,7 +204,7 @@ public class BlazegraphServiceImpl implements BlazegraphService {
                 result.close();
             }
 
-            return null;
+            return item;
         } catch (RepositoryException | MalformedQueryException |
                 QueryEvaluationException e) {
             logger.error(id + "\n" + e.toString());
@@ -216,36 +220,23 @@ public class BlazegraphServiceImpl implements BlazegraphService {
         try {
             repositoryConnection = repositoryComponent.getRepository().getConnection();
 
-            final TupleQuery tupleQuery = repositoryConnection
-                    .prepareTupleQuery(QueryLanguage.SPARQL,
-                            queryEntitySearch(id));
-            final TupleQueryResult result = tupleQuery.evaluate();
-
             FatEntity fatEntity = new FatEntity();
 
             FatEntityStructure fatEntityStructure = new FatEntityStructure();
             fatEntityStructure.setId(id);
 
-            //int reference = 1;
-            try {
-                while (result.hasNext()) {
-                    final BindingSet bindingSet = result.next();
+            final TupleQuery tupleQuery = repositoryConnection
+                    .prepareTupleQuery(QueryLanguage.SPARQL,
+                            queryEntitySearch(id));
 
-                    if(bindingSet.getValue("property").stringValue().contains("hasRefID")){
-                        fatEntityStructure.setLabels(new Labels(new En(bindingSet.getValue("value").stringValue())));
-                    }
-                    if(bindingSet.getValue("property").stringValue().contains("hasDescription")){
-                        fatEntityStructure.setDescriptions(new Descriptions(new En(bindingSet.getValue("value").stringValue())));
-                    }
-                    if(bindingSet.getValue("property").stringValue().contains("hasReference")){
-                        fatEntityStructure.setClaims(bindingSet.getValue("property").stringValue()/*.concat(String.valueOf(reference++))*/,
-                                new Claims(new Mainsnak(bindingSet.getValue("property").stringValue(),
-                                        new DataValue(bindingSet.getValue("value").stringValue(),"string"))));
-                    }
-                }
-            } finally {
-                result.close();
-            }
+            getFatEntityLabelDescription(fatEntityStructure, tupleQuery.evaluate());
+
+            final TupleQuery tupleQuery2 = repositoryConnection
+                    .prepareTupleQuery(QueryLanguage.SPARQL,
+                            queryFatEntitySearch(id));
+
+            getFatEntityClaims(fatEntityStructure, tupleQuery2.evaluate());
+
             fatEntity.setEntities(id, fatEntityStructure);
             return fatEntity;
         } catch (RepositoryException | MalformedQueryException |
@@ -255,6 +246,44 @@ public class BlazegraphServiceImpl implements BlazegraphService {
         } finally {
             if(repositoryConnection != null)
                 repositoryConnection.close();
+        }
+    }
+
+    private void getFatEntityLabelDescription(FatEntityStructure fatEntityStructure, final TupleQueryResult result) throws QueryEvaluationException {
+        try {
+            while (result.hasNext()) {
+                final BindingSet bindingSet = result.next();
+                if(bindingSet.getValue("property").stringValue().contains("hasRefID")){
+                    fatEntityStructure.setLabels(new Labels(new En(bindingSet.getValue("value").stringValue())));
+                }
+                if(bindingSet.getValue("property").stringValue().contains("hasDescription")){
+                    fatEntityStructure.setDescriptions(new Descriptions(new En(bindingSet.getValue("value").stringValue())));
+                }
+            }
+        } finally {
+            result.close();
+        }
+    }
+
+    private void getFatEntityClaims(FatEntityStructure fatEntityStructure, final TupleQueryResult result2) throws QueryEvaluationException {
+        try {
+            String platform = null;
+            List<Claims> claimsList = new ArrayList<>();
+
+            while (result2.hasNext()) {
+                final BindingSet bindingSet = result2.next();
+
+                if(platform == null){
+                    platform = bindingSet.getValue("platform").stringValue()
+                            .substring(0, bindingSet.getValue("platform").stringValue().indexOf("#"));
+                }
+                claimsList.add(new Claims(new Mainsnak(platform,
+                                new DataValue(bindingSet.getValue("label").stringValue(),"string"))));
+            }
+
+            fatEntityStructure.setClaims(platform, claimsList);
+        } finally {
+            result2.close();
         }
     }
 
@@ -312,6 +341,22 @@ public class BlazegraphServiceImpl implements BlazegraphService {
         return "SELECT DISTINCT ?property ?value\n" +
                 "WHERE {\n" +
                 " <" + id + "> ?property ?value.\n" +
+                "}";
+    }
+
+    private String queryFatEntitySearch(String id){
+        return "PREFIX main: <http://www.semanticweb.org/rycht/ontologies/cyber_security_ontology#>\n" +
+                "PREFIX platform: <http://www.semanticweb.org/rycht/ontologies/cyber_security_ontology/platform#>\n" +
+                "PREFIX cve: <https://cve.mitre.org/about/terminology.html#>\n" +
+                "PREFIX oval:<https://oval.mitre.org/language/version5.11/OVAL>\n" +
+                "\n" +
+                "SELECT ?cve ?platform ?label\n" +
+                "WHERE {\n" +
+                "  BIND(<" + id + "> AS ?cve)\n" +
+                "  ?oval a oval:.\n" +
+                "  ?oval main:hasCVE ?cve.\n" +
+                "  ?oval main:affectedPlatform ?platform.\n" +
+                "  ?platform rdfs:label ?label .\n" +
                 "}";
     }
 

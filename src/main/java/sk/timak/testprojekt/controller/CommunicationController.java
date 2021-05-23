@@ -30,7 +30,7 @@ public class CommunicationController {
         return ResponseEntity.ok(blazegraphService.getSearchResult(platform));
     }
 
-    @GetMapping("/entity")// do not use it
+    @GetMapping("/entity")
     public ResponseEntity<?> getEntityResults(@RequestParam(required = true) String id,
                                               @RequestParam(required = false) String props,
                                               @RequestParam(required = false) String languages,

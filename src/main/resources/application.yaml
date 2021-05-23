@@ -1,19 +1,39 @@
+spring:
+  profiles:
+    active: "prod"
 server:
-  port: 8080
+  port: 8081
   tomcat:
     relaxed-path-chars: ['{','}','<','>','[',']']
     relaxed-query-chars: ['{','}','<','>','[',']']
-#leave this property
-cross:
-  origin:
-    resource: http://147.175.121.153
-#leave this property
-base:
-  url: localhost:8080
 #property ontology is path to ontologies repository
 #property journal is path to journal file where is whole ontology
 resource:
   oval: oval_generate_data_asa.rdf,oval_generate_data_ios.rdf,oval_generate_data_iosxe.rdf,oval_generate_data_macos.rdf,oval_generate_data_pixos.rdf,oval_generate_data_unix.rdf,oval_generate_data_windows.rdf
   path:
-    ontology: D:\\testzmazat\\ontologies
-    journal: C:\\your\\example\\path\\blazegraph\\example.jnl
+    ontology: /home/example/path
+    journal: /home/example/path
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+#leave this property
+cross:
+  origin:
+    resource: http://localhost
+#leave this property
+base:
+  url: localhost
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+#leave this property
+cross:
+  origin:
+    resource: http://147.175.121.153:80
+#leave this property
+base:
+  url: 147.175.121.153
