@@ -129,7 +129,7 @@ public class BlazegraphServiceImpl implements BlazegraphService {
                 "  FILTER (regex(?platformLabel, \""+ platform +"\", \"i\"))\n" +
                 "  ?cve rdfs:label ?ovalLabel .\n" +
                 "  ?oval main:hasDescription ?description\n" +
-                "}";
+                "} LIMIT 100"; // REMOVE LIMIT FOR MORE VULNURABILITIES, PAGING IS NOT DEVELOPED for 0-99, 100-199 vulnurabilities
     }
 
     private Search getSearchItem(final BindingSet bindingSet, String platform){

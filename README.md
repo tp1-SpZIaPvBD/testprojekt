@@ -16,7 +16,8 @@ Java 11, Maven, Blazegraph.
 
 V zložke src/main/resource/aplication.yaml
 
-Vytvorte si nový journal súbor nazov.jnl a nastavte si tam cestu pre tento journal súbor.
+Vytvorte si nový journal súbor nazov.jnl a nastavte cestu pre tento journal súbor.
+Nastavte cestu k projektu/zlozke [ontologies](https://github.com/tp1-SpZIaPvBD/ontologies)
 
 Tento nový journal súbor by nemal byť použitý žiadnou ďalšou aplikáciou.
 
@@ -34,7 +35,7 @@ $ java -jar testprojekt-0.0.1-SNAPSHOT.jar
 
 ### Swagger ###
 
-Užitočný na prevolavanie aplikácie pomocou REST API, alternatíva pre Postmana.
+Užitočný na prevolavanie aplikácie pomocou REST API, alternatíva pre Postmana/curl.
 
 Po štarte aplikácie zavolaj URL uvedenú nižšie.
 
@@ -47,8 +48,9 @@ Aktuálna verzia 2
 
 V communication-controller sú API:
 1. http://localhost:8080/query?query=SELECT DISTINCT ?property ?value WHERE { <https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2007-1216> ?property ?value. }.
-2. http://localhost:8080/search?platform=Linux
-3. http://localhost:8080/entity?id=https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2001-1494&props=info
+2. http://localhost:8080/entity?id=https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2001-1494&props=info
+3. http://localhost:8080/search?platform=Linux 
+> Poznámka: search api ma limit 100 zranitelnosti, pretoze sqid momentalne nezobrazuje viacej ako 10, pre buducnost strankovania(paging)/testovania odstrante alebo upravte tento limit v SPARQL query
 
 ### Vývoj ###
 
